@@ -3,11 +3,13 @@ package ghrepo
 import (
 	"fmt"
 	"net/url"
+	"os"
 	"strings"
 )
 
 // TODO these are sprinkled across command, context, config, and ghrepo
-const defaultHostname = "github.com"
+var defaultHostname = "github.com"
+
 
 // Interface describes an object that represents a GitHub repository
 type Interface interface {
@@ -40,6 +42,10 @@ func FromFullName(nwo string) Interface {
 
 // FromURL extracts the GitHub repository information from a URL
 func FromURL(u *url.URL) (Interface, error) {
+	if gheHostname := os.Getenv("GITHUB_HOST"); gheHostname != "" {
+		defaultHostname = gheHostname
+	}
+
 	if !strings.EqualFold(u.Hostname(), defaultHostname) && !strings.EqualFold(u.Hostname(), "www."+defaultHostname) {
 		return nil, fmt.Errorf("unsupported hostname: %s", u.Hostname())
 	}
